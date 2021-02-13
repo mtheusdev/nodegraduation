@@ -2,8 +2,9 @@ const express = require("express")
 const app = express();
 const bodyParser = require("body-parser")
 const connection = require("./database/database")
-const perguntaModel = require("./database/Pergunta")
-    //DATABASE
+const Pergunta = require("./database/Pergunta")
+
+//DATABASE
 connection.authenticate().then(() => {
     console.log("Conexão feita com o banco de dados")
 }).catch((err) => {
@@ -19,7 +20,12 @@ app.use(bodyParser.json()) // ler dados via json
 
 
 app.get('/', (req, res) => {
-    res.render("index");
+    Pergunta.findAll({ raw: true }).then(perguntas => { // raw: true, trazer so as infos da tabela
+        res.render("index", {
+            perguntas: perguntas
+        });
+    })
+
 });
 
 app.get('/perguntar', (req, res) => {
@@ -29,7 +35,12 @@ app.get('/perguntar', (req, res) => {
 app.post('/salvarpergunta', (req, res) => {
     var titulo = req.body.titulo
     var descricao = req.body.descricao
-    res.send(titulo + ' ' + descricao)
+    Pergunta.create({
+        titulo: titulo,
+        descricao: descricao
+    }).then(() => {
+        res.redirect("/") // redirecionando o usuário para a pag inicial depois de inserir no banco caso sucesso
+    })
 });
 
 app.listen(3000, () => {
