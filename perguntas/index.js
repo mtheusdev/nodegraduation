@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require("body-parser")
 const connection = require("./database/database")
 const Pergunta = require("./database/Pergunta")
+const Resposta = require("./database/Resposta")
 
 //DATABASE
 connection.authenticate().then(() => {
@@ -20,7 +21,12 @@ app.use(bodyParser.json()) // ler dados via json
 
 
 app.get('/', (req, res) => {
-    Pergunta.findAll({ raw: true }).then(perguntas => { // raw: true, trazer so as infos da tabela
+    Pergunta.findAll({
+        raw: true,
+        order: [
+            ['id', 'DESC'] // ASC OU DESC
+        ]
+    }).then(perguntas => { // raw: true, trazer so as infos da tabela
         res.render("index", {
             perguntas: perguntas
         });
@@ -32,6 +38,33 @@ app.get('/perguntar', (req, res) => {
     res.render("perguntar");
 });
 
+app.get('/pergunta/:id', (req, res) => {
+    var id = req.params.id
+    Pergunta.findOne({
+        where: { id: id }
+    }).then(pergunta => {
+        if (pergunta != undefined) { // pergunta foi achada
+            Resposta.findAll({
+                where: {
+                    perguntaId: pergunta.id
+                },
+                order: [
+                    ['id', 'DESC']
+                ]
+            }).then(respostas => {
+                res.render("pergunta", {
+                    pergunta: pergunta,
+                    respostas: respostas
+                });
+            })
+
+        } else {
+            res.redirect("/");
+        }
+    })
+
+})
+
 app.post('/salvarpergunta', (req, res) => {
     var titulo = req.body.titulo
     var descricao = req.body.descricao
@@ -40,6 +73,17 @@ app.post('/salvarpergunta', (req, res) => {
         descricao: descricao
     }).then(() => {
         res.redirect("/") // redirecionando o usuário para a pag inicial depois de inserir no banco caso sucesso
+    })
+});
+
+app.post('/responder', (req, res) => {
+    var corpo = req.body.corpo
+    var perguntaId = req.body.pergunta
+    Resposta.create({
+        corpo: corpo,
+        perguntaId: perguntaId
+    }).then(() => {
+        res.redirect("/pergunta/" + perguntaId) // redirecionando o usuário para a pag inicial depois de inserir no banco caso sucesso
     })
 });
 
