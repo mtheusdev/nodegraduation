@@ -4,12 +4,22 @@ const bodyParser = require("body-parser")
 const connection = require("./database/database")
 const categoriesController = require("./categories/CategoriesController");
 const articlesController = require("./articles/ArticlesController");
+const usersController = require("./user/UserController");
+const session = require("express-session")
 
 const Article = require("./articles/Article")
 const Category = require("./categories/Category")
-
+const User = require("./user/User")
 
 app.set('view engine', 'ejs');
+
+//Redis => banco de dados focado em salvamento de sessoes e cache
+
+app.use(session({
+    secret: "qualquercoisa",
+    cookie: { maxAge: 30000 }
+}))
+
 app.use(express.static('public'))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
@@ -21,14 +31,14 @@ connection.authenticate().then(() => {
 })
 app.use("/", categoriesController) // usando as rotas que estão no controller das categorias
 app.use("/", articlesController)
-
-
+app.use("/", usersController)
 
 app.get("/", (req, res) => {
     Article.findAll({
         order: [
             ["id", "desc"]
-        ]
+        ],
+        limit: 4
     }).then(articles => {
         Category.findAll().then(categories => {
             res.render("index", {
