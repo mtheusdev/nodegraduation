@@ -1,0 +1,15 @@
+{
+    "name": "conversor",
+    "version": "1.0.0",
+    "description": "conversor exel para html e pdf",
+    "main": "app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Matheus Henrique",
+    "license": "ISC",
+    "dependencies": {
+        "ejs": "^3.1.6",
+        "html-pdf": "^2.2.0"
+    }
+}
