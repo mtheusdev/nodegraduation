@@ -7,16 +7,14 @@ var io = require("socket.io")(http);
 
 io.on("connection", (socket) => {
 
-    socket.on("disconnect", () => [
+    socket.on("disconnect", () => {
         console.log(" x desconectou" + socket.id)
-    ])
-
-    socket.on("boasvindas", (data) => {
-        console.log(data)
     })
-    socket.on("palavra", (palavra) => {
-        console.log(palavra)
-        socket.emit("resultado", palavra + " - Matheus")
+
+    socket.on("msg", (data) => {
+        io.emit("showmsg", data) // retornando para todo mundo
+            //socket.emit("showmsg", data) emitindo para mim
+        console.log(data)
     })
 
 })
